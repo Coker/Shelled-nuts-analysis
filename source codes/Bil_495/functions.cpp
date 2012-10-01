@@ -8,24 +8,20 @@
  *
  *
  */
-void detechTheObject(IplImage img, unsigned int x, unsigned int y)
+void detechTheObject(IplImage *img, unsigned int x, unsigned int y)
 {
-	unsigned int height =0,
-		width =0,
-		step =0,
-		channels =0;
-	
-	unsigned int red =0,
-		green =0,
-		blue =0;	
-	
-	uchar *data;
+	static unsigned int red = 0,
+						green = 0,
+						blue = 0;
 
-	height    = img.height; // x aks
-	width     = img.width;  // y aks
-	step      = img.widthStep;
-	channels  = img.nChannels;
-	data      = (uchar *)img.imageData;
+	static unsigned int width = 0,
+						height = 0;
+	
+	static uchar *imgData;
 
-	printf("detechTheObject functions !\n");
+	width = img->width;
+	height = img->height;
+	imgData = (uchar *)img->imageData;
+	
+	cvLine(img, cvPoint(x, y), cvPoint(x, y), cvScalar(0,255,0), 1);
 }

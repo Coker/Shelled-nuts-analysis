@@ -5,6 +5,8 @@
 #include <cv.h>
 #include <highgui.h>
 
-void detechTheObject(IplImage* img, unsigned int x, unsigned int y);
+#define PIXEL_DEPTH 220
+
+void detechTheObject(IplImage *img, unsigned int x, unsigned int y);
 
 #endif
