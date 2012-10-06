@@ -42,7 +42,7 @@ int main()
 	cvNamedWindow("mainWin", CV_WINDOW_AUTOSIZE);
 	cvNamedWindow("tempWin", CV_WINDOW_AUTOSIZE);
 	cvMoveWindow("mainWin", 100, 100);
-	
+
 	for (int y=0; y<height; ++y) {
 		for (int x=0; x<width; ++x) {
 			red = ((uchar*)(originalImg->imageData + originalImg->widthStep*y))[x*3];
@@ -50,13 +50,15 @@ int main()
 			blue = ((uchar*)(originalImg->imageData + originalImg->widthStep*y))[x*3+2];
 
 			if (red<PIXEL_DEPTH && green<PIXEL_DEPTH && blue<PIXEL_DEPTH)
-				detechTheObject(tempImg, x, y);
+				markTheObject(tempImg, x, y);
 		}
 	}
 	
+	drawIndexNumberOnObject(tempImg, originalImg);
+
 	// show the image
-	cvShowImage("tempWin", tempImg );
-	cvShowImage("mainWin", originalImg );
+	cvShowImage("tempWin", tempImg);
+	cvShowImage("mainWin", originalImg);
 
 	// wait for a key
 	cvWaitKey(0);

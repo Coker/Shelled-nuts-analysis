@@ -5,8 +5,11 @@
 #include <cv.h>
 #include <highgui.h>
 
-#define PIXEL_DEPTH 220
+#define PIXEL_DEPTH 225
 
-void detechTheObject(IplImage *img, unsigned int x, unsigned int y);
+void markTheObject(IplImage *img, unsigned int x, unsigned int y);
+void drawIndexNumberOnObject(IplImage *markedImg, IplImage *referenceImg);
+void detectAndSetIndex(IplImage *markedImg, IplImage *referenceImg,
+					   unsigned int x, unsigned int y, bool isNewObject=false);
 
 #endif
