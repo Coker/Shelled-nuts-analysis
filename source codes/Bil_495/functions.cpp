@@ -192,10 +192,10 @@ void detectAndSetIndex(IplImage *markedImg, IplImage *referenceImg,
 	}
 	
 	if (true == isNewObject) {
-		cvLine(markedImg, cvPoint(x1-1, y1-1), cvPoint(x2+1, y1-1), cvScalar(0,0,0), 1);		
-		cvLine(markedImg, cvPoint(x1-1, y2+1), cvPoint(x2+1, y2+1), cvScalar(0,0,0), 1);
-		cvLine(markedImg, cvPoint(x1-1, y1-1), cvPoint(x1-1, y2+1), cvScalar(0,0,0), 1);
-		cvLine(markedImg, cvPoint(x2+1, y1), cvPoint(x2+1, y2), cvScalar(0,0,0), 1);
+		cvLine(referenceImg, cvPoint(x1-1, y1-1), cvPoint(x2+1, y1-1), cvScalar(0,0,0), 1);		
+		cvLine(referenceImg, cvPoint(x1-1, y2+1), cvPoint(x2+1, y2+1), cvScalar(0,0,0), 1);
+		cvLine(referenceImg, cvPoint(x1-1, y1-1), cvPoint(x1-1, y2+1), cvScalar(0,0,0), 1);
+		cvLine(referenceImg, cvPoint(x2+1, y1), cvPoint(x2+1, y2), cvScalar(0,0,0), 1);
 
 		cvNamedWindow("detectorWin", CV_WINDOW_AUTOSIZE);
 		cvShowImage("detectorWin", markedImg);
