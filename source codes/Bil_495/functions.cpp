@@ -72,10 +72,14 @@ void detectAndSetIndex(IplImage *markedImg, IplImage *referenceImg,
 					   unsigned int x, unsigned int y, bool isNewObject)
 {
 	static unsigned int x1=x, x2=x, y1=y, y2=y;
+	static unsigned int numberOfPixel = 0;
+	static unsigned long sumOfPixel = 0;
 	
 	if (true == isNewObject) {
 		x1 = x2 = x;
 		y1 = y2 = y;
+		numberOfPixel = 0;
+		sumOfPixel = 0;
 	}
 
 	static unsigned int width = markedImg->width,
@@ -88,6 +92,9 @@ void detectAndSetIndex(IplImage *markedImg, IplImage *referenceImg,
 	unsigned int red = ((uchar*)(markedImg->imageData + markedImg->widthStep*y))[x*3],
 				 green = ((uchar*)(markedImg->imageData + markedImg->widthStep*y))[x*3+1],
 				 blue = ((uchar*)(markedImg->imageData + markedImg->widthStep*y))[x*3+2];
+	
+	sumOfPixel += ((uchar*)(referenceImg->imageData + referenceImg->widthStep*y))[x*3];
+	++numberOfPixel;
 
 	cvLine(markedImg, cvPoint(x, y), cvPoint(x, y), cvScalar(255,0,0), 1);
 
@@ -192,15 +199,45 @@ void detectAndSetIndex(IplImage *markedImg, IplImage *referenceImg,
 	}
 	
 	if (true == isNewObject) {
-		cvLine(referenceImg, cvPoint(x1-1, y1-1), cvPoint(x2+1, y1-1), cvScalar(0,0,0), 1);		
-		cvLine(referenceImg, cvPoint(x1-1, y2+1), cvPoint(x2+1, y2+1), cvScalar(0,0,0), 1);
-		cvLine(referenceImg, cvPoint(x1-1, y1-1), cvPoint(x1-1, y2+1), cvScalar(0,0,0), 1);
-		cvLine(referenceImg, cvPoint(x2+1, y1), cvPoint(x2+1, y2), cvScalar(0,0,0), 1);
+		if (numberOfPixel<150)
+			return;
 
-		cvNamedWindow("detectorWin", CV_WINDOW_AUTOSIZE);
-		cvShowImage("detectorWin", markedImg);
-		cvWaitKey(0);
+		// cvLine(referenceImg, cvPoint(x1-1, y1-1), cvPoint(x2+1, y1-1), cvScalar(0,0,0), 1);		
+		// cvLine(referenceImg, cvPoint(x1-1, y2+1), cvPoint(x2+1, y2+1), cvScalar(0,0,0), 1);
+		// cvLine(referenceImg, cvPoint(x1-1, y1-1), cvPoint(x1-1, y2+1), cvScalar(0,0,0), 1);
+		// cvLine(referenceImg, cvPoint(x2+1, y1), cvPoint(x2+1, y2), cvScalar(0,0,0), 1);
+
+		// cvNamedWindow("detectorWin", CV_WINDOW_AUTOSIZE);
+		// cvShowImage("detectorWin", markedImg);
+		// cvWaitKey(0);
+
+		classifyTheObject(referenceImg, cvPoint((x1+x2)/2, (y1+y2)/2), sumOfPixel/numberOfPixel, numberOfPixel);
 	}
 
 	return;
+}
+
+void classifyTheObject(IplImage *originalImg, CvPoint centerOfTheObject, int densityOfTheObject, int numberOfPixel)
+{
+	static CvFont font;
+	static double hScale=0.5;
+	double vScale=0.5;
+	static int lineWidth=1.5;
+
+	centerOfTheObject.y += 5;
+	centerOfTheObject.x -= 3;
+
+	cvInitFont(&font, CV_FONT_HERSHEY_TRIPLEX, hScale, vScale, 0, lineWidth);
+	
+	 
+	if (densityOfTheObject<190) {
+		cvPutText(originalImg, "A", centerOfTheObject, &font, cvScalar(125,125,0));
+		return;
+	} else if (densityOfTheObject<200) {
+		cvPutText(originalImg, "B", centerOfTheObject, &font, cvScalar(125,125,0));
+		return;	
+	} else {
+		cvPutText(originalImg, "C", centerOfTheObject, &font, cvScalar(125,125,0));
+		return;
+	}
 }
