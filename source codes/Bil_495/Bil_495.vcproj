@@ -59,6 +59,10 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="cv210.lib cxcore210.lib highgui210.lib"
 				GenerateDebugInformation="true"
+				HeapReserveSize="0"
+				HeapCommitSize="0"
+				StackReserveSize="0"
+				StackCommitSize="0"
 				TargetMachine="1"
 			/>
 			<Tool
