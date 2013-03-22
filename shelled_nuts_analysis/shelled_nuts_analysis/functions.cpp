@@ -620,6 +620,12 @@ int detectShelledNuts(const char const *highLevelPath,
 int applyFiveFoldsCrossValidation(const char const *walnutsDataFilePath)
 {
 	FILE *walnutsDataFile = fopen(walnutsDataFilePath, "r");
+	FILE *classificationResult = fopen("classRes.txt", "w");
+	
+	if (NULL == classificationResult) {
+		fprintf(stderr, "ERROR ! File not created\n");
+		return FILE_NOT_CREATED;
+	}
 
 	if (NULL == walnutsDataFile) {
 		fprintf(stderr, "ERROR ! File not found\n");
@@ -629,6 +635,8 @@ int applyFiveFoldsCrossValidation(const char const *walnutsDataFilePath)
 	WalnutsData walnuts[60]; // We have 60 walnuts
 	WalnutsData trainSet[55];
 	WalnutsData testSet[5];
+	float *dataIter = NULL;
+	float *respIter = NULL;
 
 	walnut.size =0,
 	walnut.ratio =0,
@@ -636,10 +644,11 @@ int applyFiveFoldsCrossValidation(const char const *walnutsDataFilePath)
 	walnut.classOfNuts =0;
 	
 	int testPos = 0;
-	// k folds cross validation. our k is 5
+
+	// k folds cross validation. our k is 5.
 	const int testCaseVariable = 5;
 		
-	// we get all walnuts data from file
+	// we get all walnuts data from file.
 	for (int i=0; i<60; ++i) {
 		fscanf(walnutsDataFile, "%d%d%d%d", &(walnut.size), &(walnut.ratio),
 				&(walnut.density), &(walnut.classOfNuts));
@@ -651,7 +660,7 @@ int applyFiveFoldsCrossValidation(const char const *walnutsDataFilePath)
 		walnuts[i].density = walnut.density;
 		walnuts[i].classOfNuts = walnut.classOfNuts;
 	} // end of for loop
-
+	
 	for (int i=0; i<(60/testCaseVariable); ++i) {
 		int testWalnutNumber=0;
 		int trainWalnutNumber=0;
@@ -662,17 +671,69 @@ int applyFiveFoldsCrossValidation(const char const *walnutsDataFilePath)
 				trainSet[trainWalnutNumber++] = walnuts[j];
 		}
 
-		for (int i=0; i<5; ++i)
-			printf("test set %d: %d %d %d %d\n", i, testSet[i].size, testSet[i].ratio, testSet[i].density, testSet[i].classOfNuts);
+		for (int j=0; j<5; ++j)
+			printf("test set %d: %d %d %d %d\n", j, testSet[j].size, testSet[j].ratio,
+				testSet[j].density, testSet[j].classOfNuts);
 		printf("**************\n");
 
 		CvDTree *tree = new CvDTree;
-		CvMat trainMatris = cvCreateMat(55, 3, CV_32F);
-		CvMat testMatris = cvCreateMat(5, 3, CV_32F);
-		
-		
+		CvDTreeNode *leaf = NULL;
+		CvMat *trainMatris = cvCreateMat(55, 2, CV_32F);
+		CvMat *respMatris = cvCreateMat(55, 1, CV_32F);
+		CvMat *testMatris = cvCreateMat(1, 2, CV_32F);
+		CvMat *variableType = cvCreateMat(trainMatris->cols+1, 1, CV_8U);
+		cvSet(variableType, cvScalarAll(CV_VAR_CATEGORICAL));
+		float *priors = NULL;
 
+		CvDTreeParams params =
+			CvDTreeParams(25, // max depth
+                           5, // min sample count
+                           0, // regression accuracy: N/A here
+                           false, // compute surrogate split, no missing data
+                           15, // max number of categories (use sub-optimal \
+								  algorithm for larger numbers)
+                           5, // the number of cross-validation folds
+                           false, // use 1SE rule => smaller tree
+                           false, // throw away the pruned tree branches
+                           priors // the array of priors
+                           );
+		
+		if (NULL == trainMatris && NULL == tree && NULL == respMatris) {
+			fprintf(stderr, "ERROR ! Not enough stack space !\n");
+			return NOT_ENOUGH_STACK_SPACE;
+		}
+
+		for (int j=0; j<55; ++j) {
+			dataIter = ((trainMatris->data.fl) + (j*2));
+			respIter = ((respMatris->data.fl) + j);
+
+			*dataIter = (int) trainSet[j].size;
+			*(++dataIter) = (int) trainSet[j].density;
+			*respIter = (int) trainSet[j].classOfNuts;
+		} // end of for loop
+		
+		dataIter = NULL;
+		respIter = NULL;
+		
+		// desicion tree is training ...
+		tree->train(trainMatris, CV_ROW_SAMPLE, respMatris, NULL, NULL, variableType, NULL, params);
+		
+		for (int j=0; j<5; ++j) {
+			dataIter = testMatris->data.fl;
+
+			*dataIter = (int) testSet[j].size;
+			*(++dataIter) = (int) testSet[j].density;
+
+			leaf = tree->predict(testMatris);
+
+			fprintf(classificationResult, "%d\n", (int) leaf->value);
+		}// end of for loop
+		
+		
 	} // end of for loop
+	
+	fclose(walnutsDataFile);
+	fclose(classificationResult);
 
 	return NO_PROBLEM;
 }

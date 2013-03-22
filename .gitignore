@@ -1,2 +1,5 @@
-documents
-source codes/Debug
+shelled_nuts_analysis/Debug
+shelled_nuts_analysis/Release
+shelled_nuts_analysis/*.sln
+shelled_nuts_analysis/*.ncb
+shelled_nuts_analysis/*.suo
