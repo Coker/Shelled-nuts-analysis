@@ -457,11 +457,9 @@ int detectShelledNutsPixel(const char const *highLevelPath,
 			pixelRatio *= MULTIPLIER;
 			
 			ddata = currentPositionData->data.fl;
-			*ddata = (int) color1;
-			++ddata;
-			*ddata = (int) color2;
-			++ddata;
-			*ddata = (int) pixelRatio;
+			*ddata 	   = (int) color1;
+			*(++ddata) = (int) color2;
+			*(++ddata) = (int) pixelRatio;
 
 			leaf = shelledNutsTree->predict(currentPositionData);
 			
